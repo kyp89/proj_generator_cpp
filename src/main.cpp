@@ -12,11 +12,12 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < argc; i++) {
         std::cout << "argv[" << i << "] = " << argv[i] << "\n";
     }
-    std::string myLibrary = "MyLibrary";
+    ProjectGenerator::ProjectParams params = ProjectGenerator::getParamsFromArgs(argc, argv);
+    //std::string myLibrary = "MyLibrary";
     //Only for tests
-    ProjectGenerator::clearPath(myLibrary);
+    ProjectGenerator::clearPath(params.name);
     //
-    ProjectGenerator::generarteProject(myLibrary, "", appPath);
+    ProjectGenerator::generarteProject(params.name, params.path.string(), appPath);
 
     int val = 0;
     std::cin >> val;

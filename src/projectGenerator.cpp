@@ -55,4 +55,17 @@ namespace ProjectGenerator {
             std::cerr << "Error: " << e.what() << "\n";
         }
     }
+
+    ProjectParams getParamsFromArgs(int argc, char* argv[]) {
+        ProjectParams projectParams;
+        for(int i = 0; i < argc; i++) {
+            if(argv[i] == ProjectGenerator::PROJECT_NAME) {
+                projectParams.name = argv[i+1];
+            }
+            if(argv[i] == ProjectGenerator::PROJECT_PATH) {
+                projectParams.path = argv[i+1];
+            }
+        }
+        return projectParams;
+    }
 }
