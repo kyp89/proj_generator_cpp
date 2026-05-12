@@ -13,6 +13,26 @@ namespace ProjectGenerator {
     /*PARAMS*/
     inline  constexpr std::string_view PROJECT_NAME = "--projectName";
     inline  constexpr std::string_view PROJECT_PATH = "--projectPath";
+    inline  constexpr std::string_view PROJECT_USE_SDL = "--useSDL";
+    inline  constexpr std::string_view PROJECT_USE_SDL_VAL = "yes";
+
+    namespace CmakeParamsKeys {
+        constexpr std::string_view FETCH_CONTENT = "#{{FETCH_CONTENT}}";
+        constexpr std::string_view SDL_FETCH = "#---{{SDL_FETCH}}";
+        constexpr std::string_view SDL_TARGET_LINK = "#{{SDL_TARGET_LINK}}";
+        constexpr std::string_view SDL_COPY_DLL = "#{{SDL_COPY_DLL}}";
+    }
+
+    namespace CmakeParamsCommonValue {
+        inline  constexpr std::string_view FETCH_CONTENT = "include(FetchContent)";
+    }
+
+    namespace SDLTemplateFiles {
+        inline  constexpr std::string_view SDL_FETCH = "templates/SDL/sdl-fetch.template.txt";
+        inline  constexpr std::string_view SDL_TARGET_LINK = "templates/SDL/sdl-link.template.txt";
+        inline  constexpr std::string_view SDL_COPY_DLL = "templates/SDL/sdl-copy-dll.template.txt";
+        inline  constexpr std::string_view SDL_MAIN = "templates/SDL/main.cpp";
+    }
 
     namespace CmakeParams {
         constexpr std::string_view PROJECT_NAME = "{{PROJECT_NAME}}";
@@ -24,6 +44,7 @@ namespace ProjectGenerator {
         std::string name = "MyNewProject";
         std::filesystem::path path = "";
         std::string cmakeVersion = "3.26";
+        bool useSdl = false;
     };
     
     ProjectParams getParamsFromArgs(int argc, char* argv[]);

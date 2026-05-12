@@ -106,6 +106,9 @@ namespace ProjectGenerator {
             if(argv[i] == ProjectGenerator::PROJECT_PATH) {
                 projectParams.path = argv[i+1];
             }
+            if(argv[i] == ProjectGenerator::PROJECT_USE_SDL) {
+                projectParams.useSdl = argv[i+1] == ProjectGenerator::PROJECT_USE_SDL_VAL;
+            }
         }
         return projectParams;
     }

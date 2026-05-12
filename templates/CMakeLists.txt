@@ -9,6 +9,11 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+#{{FETCH_CONTENT}}
+#{{SDL_FETCH}}
+
+#
+
 #ADD Library
 # add_library(ProjGenCppLib
 #     src/projectGenerator.cpp
@@ -24,6 +29,8 @@ add_executable({{PROJECT_NAME}}
     tests/main.cpp
 )
 
+#{{SDL_TARGET_LINK}}
+
 # target_link_libraries(ProjGenCpp
 #     PRIVATE ProjGenCppLib
 # )
@@ -33,3 +40,5 @@ add_executable({{PROJECT_NAME}}
 if(MINGW)
     target_link_options({{PROJECT_NAME}} PRIVATE -mconsole)
 endif()
+
+#{{SDL_COPY_DLL}}
