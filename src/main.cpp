@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     //Only for tests
     ProjectGenerator::clearPath(params.name);
     //
-    ProjectGenerator::generarteProject(params.name, params.path.string(), appPath);
+    ProjectGenerator::generarteProject(params.name, params.path.string(), appPath, params);
 
     int val = 0;
     std::cin >> val;

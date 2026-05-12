@@ -6,7 +6,12 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/ProjGenCpp.exe",
-      "args": [],
+      "args": [
+        "--projectName",
+        "TESTProject1",
+        "--projectPath",
+        "D:\\Prywatne\\TESTS"
+      ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
