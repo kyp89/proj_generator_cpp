@@ -10,7 +10,9 @@
         "--projectName",
         "TESTProject1",
         "--projectPath",
-        "D:\\Prywatne\\TESTS"
+        "D:\\Prywatne\\TESTS",
+        "--useSDL",
+        "yes"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

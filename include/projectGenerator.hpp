@@ -18,7 +18,7 @@ namespace ProjectGenerator {
 
     namespace CmakeParamsKeys {
         constexpr std::string_view FETCH_CONTENT = "#{{FETCH_CONTENT}}";
-        constexpr std::string_view SDL_FETCH = "#---{{SDL_FETCH}}";
+        constexpr std::string_view SDL_FETCH = "#{{SDL_FETCH}}";
         constexpr std::string_view SDL_TARGET_LINK = "#{{SDL_TARGET_LINK}}";
         constexpr std::string_view SDL_COPY_DLL = "#{{SDL_COPY_DLL}}";
     }
@@ -57,6 +57,7 @@ namespace ProjectGenerator {
     void updateMainFile(std::filesystem::path mainFilePath, const ProjectParams& projectParams);
     void replaceAll(std::string& str, const std::string& from, const std::string& to);
     void replaceInFile(const std::string& filePath, std::unordered_map<std::string, std::string>& params);
+    std::string getFileContent(const std::string& filePath);
 }
 
 #endif

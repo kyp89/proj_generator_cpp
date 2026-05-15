@@ -84,14 +84,24 @@ namespace ProjectGenerator {
                 std::filesystem::copy_options::overwrite_existing
             );
 
-            std::filesystem::path mainFileSrc = templatesDir / "main.cpp";
-            std::filesystem::path mainFileDest = fullProjectPath / "tests" /"main.cpp";
-            std::filesystem::copy_file(
-                mainFileSrc,
-                mainFileDest,
-                std::filesystem::copy_options::overwrite_existing
-            );
-            updateMainFile(mainFileDest, projectParams);
+            if(projectParams.useSdl) {
+                std::filesystem::path mainFileSrc = templatesDir / "SDL" / "main.cpp";
+                std::filesystem::path mainFileDest = fullProjectPath / "tests" /"main.cpp";
+                std::filesystem::copy_file(
+                    mainFileSrc,
+                    mainFileDest,
+                    std::filesystem::copy_options::overwrite_existing
+                );
+            } else {
+                std::filesystem::path mainFileSrc = templatesDir / "main.cpp";
+                std::filesystem::path mainFileDest = fullProjectPath / "tests" /"main.cpp";
+                std::filesystem::copy_file(
+                    mainFileSrc,
+                    mainFileDest,
+                    std::filesystem::copy_options::overwrite_existing
+                );
+                updateMainFile(mainFileDest, projectParams);
+            }
         } catch (const std::filesystem::filesystem_error& e) {
             std::cerr << "Error: " << e.what() << "\n";
         }
@@ -124,6 +134,15 @@ namespace ProjectGenerator {
                 projectParams.cmakeVersion
             }
         };
+        //Add fetch_Content
+        if(projectParams.useSdl) {
+            params[std::string(CmakeParamsKeys::FETCH_CONTENT)] = std::string(CmakeParamsCommonValue::FETCH_CONTENT);
+        }
+        if(projectParams.useSdl) {
+            params[std::string(CmakeParamsKeys::SDL_FETCH)] = getFileContent(std::string(SDLTemplateFiles::SDL_FETCH));
+            params[std::string(CmakeParamsKeys::SDL_TARGET_LINK)] = getFileContent(std::string(SDLTemplateFiles::SDL_TARGET_LINK));
+            params[std::string(CmakeParamsKeys::SDL_COPY_DLL)] = getFileContent(std::string(SDLTemplateFiles::SDL_COPY_DLL));
+        }
         replaceInFile(cmakeListsFileDest.string(), params);
     }
 
@@ -158,16 +177,17 @@ namespace ProjectGenerator {
                 str.replace(startPos, from.length(), to);
                 startPos += to.length();
             }
-        }
+    }
 
     void replaceInFile(const std::string& filePath, std::unordered_map<std::string, std::string>& params)
         {
             // Odczyt pliku
-            std::ifstream input(filePath);
-            std::stringstream buffer;
-            buffer << input.rdbuf();
-            std::string content = buffer.str();
-            input.close();
+            // std::ifstream input(filePath);
+            // std::stringstream buffer;
+            // buffer << input.rdbuf();
+            // std::string content = buffer.str();
+            // input.close();
+            std::string content = getFileContent(filePath);
 
             // Podmiana
             for(auto [key, value]: params) {
@@ -177,5 +197,15 @@ namespace ProjectGenerator {
             // Zapis pliku
             std::ofstream output(filePath);
             output << content;
-        }
+    }
+
+    std::string getFileContent(const std::string& filePath) {
+        std::ifstream input(filePath);
+        std::stringstream buffer;
+        buffer << input.rdbuf();
+        std::string content = buffer.str();
+        input.close();
+        return content;
+    }
+    
 }
