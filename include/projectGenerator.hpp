@@ -15,12 +15,16 @@ namespace ProjectGenerator {
     inline  constexpr std::string_view PROJECT_PATH = "--projectPath";
     inline  constexpr std::string_view PROJECT_USE_SDL = "--useSDL";
     inline  constexpr std::string_view PROJECT_USE_SDL_VAL = "yes";
+    inline  constexpr std::string_view PROJECT_USE_RAYLIB = "--useRAYLIB";
+    inline  constexpr std::string_view PROJECT_USE_RAYLIB_VAL = "yes";
 
     namespace CmakeParamsKeys {
         constexpr std::string_view FETCH_CONTENT = "#{{FETCH_CONTENT}}";
         constexpr std::string_view SDL_FETCH = "#{{SDL_FETCH}}";
         constexpr std::string_view SDL_TARGET_LINK = "#{{SDL_TARGET_LINK}}";
         constexpr std::string_view SDL_COPY_DLL = "#{{SDL_COPY_DLL}}";
+        constexpr std::string_view RAYLIB_FETCH = "#{{RAYLIB_FETCH}}";
+        constexpr std::string_view RAYLIB_TARGET_LINK = "#{{RAYLIB_TARGET_LINK}}";
     }
 
     namespace CmakeParamsCommonValue {
@@ -34,6 +38,12 @@ namespace ProjectGenerator {
         inline  constexpr std::string_view SDL_MAIN = "templates/SDL/main.cpp";
     }
 
+    namespace RAYLIBTemplateFiles {
+        inline  constexpr std::string_view RAYLIB_FETCH = "templates/RAYLIB/raylib-fetch.template.txt";
+        inline  constexpr std::string_view RAYLIB_TARGET_LINK = "templates/RAYLIB/raylib-link.template.txt";
+        inline  constexpr std::string_view SDL_MAIN = "templates/RAYLIB/main.cpp";
+    }
+
     namespace CmakeParams {
         constexpr std::string_view PROJECT_NAME = "{{PROJECT_NAME}}";
         constexpr std::string_view CMAKE_VERSION = "{{CMAKE_VERSION}}";
@@ -45,6 +55,7 @@ namespace ProjectGenerator {
         std::filesystem::path path = "";
         std::string cmakeVersion = "3.26";
         bool useSdl = false;
+        bool useRayLib = false;
     };
     
     ProjectParams getParamsFromArgs(int argc, char* argv[]);

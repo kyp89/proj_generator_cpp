@@ -92,6 +92,14 @@ namespace ProjectGenerator {
                     mainFileDest,
                     std::filesystem::copy_options::overwrite_existing
                 );
+            } else if(projectParams.useRayLib) {
+                std::filesystem::path mainFileSrc = templatesDir / "RAYLIB" / "main.cpp";
+                std::filesystem::path mainFileDest = fullProjectPath / "tests" /"main.cpp";
+                std::filesystem::copy_file(
+                    mainFileSrc,
+                    mainFileDest,
+                    std::filesystem::copy_options::overwrite_existing
+                );
             } else {
                 std::filesystem::path mainFileSrc = templatesDir / "main.cpp";
                 std::filesystem::path mainFileDest = fullProjectPath / "tests" /"main.cpp";
@@ -119,6 +127,9 @@ namespace ProjectGenerator {
             if(argv[i] == ProjectGenerator::PROJECT_USE_SDL) {
                 projectParams.useSdl = argv[i+1] == ProjectGenerator::PROJECT_USE_SDL_VAL;
             }
+            if(argv[i] == ProjectGenerator::PROJECT_USE_RAYLIB) {
+                projectParams.useRayLib = argv[i+1] == ProjectGenerator::PROJECT_USE_RAYLIB_VAL;
+            }
         }
         return projectParams;
     }
@@ -135,13 +146,24 @@ namespace ProjectGenerator {
             }
         };
         //Add fetch_Content
-        if(projectParams.useSdl) {
+        if(projectParams.useSdl || projectParams.useRayLib) {
             params[std::string(CmakeParamsKeys::FETCH_CONTENT)] = std::string(CmakeParamsCommonValue::FETCH_CONTENT);
         }
         if(projectParams.useSdl) {
             params[std::string(CmakeParamsKeys::SDL_FETCH)] = getFileContent(std::string(SDLTemplateFiles::SDL_FETCH));
             params[std::string(CmakeParamsKeys::SDL_TARGET_LINK)] = getFileContent(std::string(SDLTemplateFiles::SDL_TARGET_LINK));
             params[std::string(CmakeParamsKeys::SDL_COPY_DLL)] = getFileContent(std::string(SDLTemplateFiles::SDL_COPY_DLL));
+        } else if(projectParams.useSdl == false) {
+            params[std::string(CmakeParamsKeys::SDL_FETCH)] = "";
+            params[std::string(CmakeParamsKeys::SDL_TARGET_LINK)] = "";
+            params[std::string(CmakeParamsKeys::SDL_COPY_DLL)] = "";
+        }
+        if(projectParams.useRayLib) {
+            params[std::string(CmakeParamsKeys::RAYLIB_FETCH)] = getFileContent(std::string(RAYLIBTemplateFiles::RAYLIB_FETCH));
+            params[std::string(CmakeParamsKeys::RAYLIB_TARGET_LINK)] = getFileContent(std::string(RAYLIBTemplateFiles::RAYLIB_TARGET_LINK));
+        } else if(projectParams.useRayLib == false) {
+            params[std::string(CmakeParamsKeys::RAYLIB_FETCH)] = "";
+            params[std::string(CmakeParamsKeys::RAYLIB_TARGET_LINK)] = "";
         }
         replaceInFile(cmakeListsFileDest.string(), params);
     }

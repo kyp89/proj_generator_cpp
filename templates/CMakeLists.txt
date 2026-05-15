@@ -11,6 +11,7 @@ endif()
 
 #{{FETCH_CONTENT}}
 #{{SDL_FETCH}}
+#{{RAYLIB_FETCH}}
 
 #
 
@@ -30,6 +31,7 @@ add_executable({{PROJECT_NAME}}
 )
 
 #{{SDL_TARGET_LINK}}
+#{{RAYLIB_TARGET_LINK}}
 
 # target_link_libraries(ProjGenCpp
 #     PRIVATE ProjGenCppLib

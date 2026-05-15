@@ -11,7 +11,7 @@
         "TESTProject1",
         "--projectPath",
         "D:\\Prywatne\\TESTS",
-        "--useSDL",
+        "--useRAYLIB",
         "yes"
       ],
       "stopAtEntry": false,
