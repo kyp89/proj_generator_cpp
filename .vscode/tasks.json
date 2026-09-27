@@ -27,6 +27,33 @@
                 "--build", "build",
                 "--config", "Debug"
             ]
+        },
+        {
+            "label": "Build and Configure Release",
+            "dependsOn": [
+                "CMake Configure Release",
+                "CMake Build Release"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "CMake Configure Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-B", "build-release",
+                "-G", "MinGW Makefiles",
+                "-DCMAKE_BUILD_TYPE=Release"
+            ]
+        },
+        {
+            "label": "CMake Build Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build", "build-release",
+                "--config", "Release"
+            ]
         }
     ]
 }

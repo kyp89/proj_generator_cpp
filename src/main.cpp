@@ -5,22 +5,19 @@
 
 int main(int argc, char* argv[]) {
 
-    std::cout << "Hello world" << std::endl;
+    std::filesystem::path appPath = std::filesystem::absolute(argv[0]).parent_path();
 
-    std::filesystem::path appPath = std::filesystem::path(argv[0]).parent_path();
+    if(argc < 2 || ProjectGenerator::isHelpRequested(argc, argv)) {
+        ProjectGenerator::printHelp();
+        return 0;
+    }
 
     for (int i = 0; i < argc; i++) {
         std::cout << "argv[" << i << "] = " << argv[i] << "\n";
     }
-    ProjectGenerator::ProjectParams params = ProjectGenerator::getParamsFromArgs(argc, argv);
-    //std::string myLibrary = "MyLibrary";
-    //Only for tests
-    ProjectGenerator::clearPath(params.name);
-    //
-    ProjectGenerator::generarteProject(params.name, params.path.string(), appPath, params);
 
-    int val = 0;
-    std::cin >> val;
+    ProjectGenerator::ProjectParams params = ProjectGenerator::getParamsFromArgs(argc, argv);
+    ProjectGenerator::generateProject(appPath, params);
 
     return 0;
 }

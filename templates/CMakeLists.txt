@@ -12,31 +12,21 @@ endif()
 #{{FETCH_CONTENT}}
 #{{SDL_FETCH}}
 #{{RAYLIB_FETCH}}
+#{{JSON_FETCH}}
+#{{HTTP_FETCH}}
 
-#
-
-#ADD Library
-# add_library(ProjGenCppLib
-#     src/projectGenerator.cpp
-# )
-
-# target_include_directories(ProjGenCppLib
-#     PUBLIC
-#         ${CMAKE_CURRENT_SOURCE_DIR}/include
-# )
+#{{LIBRARY_TARGET}}
 
 # --- Testy ---
 add_executable({{PROJECT_NAME}}
     tests/main.cpp
 )
 
+#{{LIBRARY_LINK}}
 #{{SDL_TARGET_LINK}}
 #{{RAYLIB_TARGET_LINK}}
-
-# target_link_libraries(ProjGenCpp
-#     PRIVATE ProjGenCppLib
-# )
-
+#{{JSON_TARGET_LINK}}
+#{{HTTP_TARGET_LINK}}
 
 # Konsola (MinGW / Windows)
 if(MINGW)

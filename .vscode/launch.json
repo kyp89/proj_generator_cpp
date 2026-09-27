@@ -12,6 +12,8 @@
         "--projectPath",
         "D:\\Prywatne\\TESTS",
         "--useRAYLIB",
+        "yes",
+        "--overwrite",
         "yes"
       ],
       "stopAtEntry": false,
@@ -21,6 +23,29 @@
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "preLaunchTask": "Build and Configure"
+    },
+    {
+      "name": "build_release",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build-release/ProjGenCpp.exe",
+      "args": [
+        "--projectName",
+        "TESTProject1",
+        "--projectPath",
+        "D:\\Prywatne\\TESTS",
+        "--useRAYLIB",
+        "yes",
+        "--overwrite",
+        "yes"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "preLaunchTask": "Build and Configure Release"
     },
     {
       "name": "C/C++ Runner: Debug Session",

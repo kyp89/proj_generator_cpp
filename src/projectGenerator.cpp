@@ -1,33 +1,32 @@
 #include "projectGenerator.hpp"
 
 namespace ProjectGenerator {
-    void clearPath(const std::string projectPath) {
+    void clearPath(const std::filesystem::path projectPath) {
         try {
             if(std::filesystem::exists(projectPath)) {
                 std::filesystem::remove_all(projectPath);
+                std::cout << "Folder/file was removed: " << projectPath.string() << std::endl;
             }
-            std::cout << "Folder/file was removed" << projectPath <<std::endl;
         } catch (const std::filesystem::filesystem_error& e) {
             std::cerr << "Error: " << e.what() << "\n";
         }
     }
 
-    void generarteProject(const std::string projectName, const std::string projectPath, const std::filesystem::path appPath, const ProjectParams& projectParams) {
-        std::cout << "generarteProject :" << projectPath << ", Project Name: " << projectName << std::endl;
+    void generateProject(const std::filesystem::path appPath, const ProjectParams& projectParams) {
+        std::cout << "generateProject: " << projectParams.path.string() << ", Project Name: " << projectParams.name << std::endl;
 
         try {
-            const std::filesystem::path fullProjectPath = projectPath == "" ? projectName : projectPath + "//" + projectName;
+            const std::filesystem::path fullProjectPath = projectParams.path / projectParams.name;
             if(std::filesystem::exists(fullProjectPath)) {
-                std::cout << "Folders already Exsist: " << fullProjectPath.string() << std::endl;
-                return; 
+                if(!projectParams.overwrite) {
+                    std::cout << "Folders already exist: " << fullProjectPath.string()
+                              << " (use " << PROJECT_OVERWRITE << " " << PROJECT_OVERWRITE_VAL << " to replace)" << std::endl;
+                    return;
+                }
+                clearPath(fullProjectPath);
             }
             createProjectDirs(fullProjectPath);
             copyProjectFiles(fullProjectPath, appPath, projectParams);
-
-            std::filesystem::path _fullProjectPath = fullProjectPath;
-
-
-
         } catch (const std::filesystem::filesystem_error& e) {
             std::cerr << "Error: " << e.what() << "\n";
         }
@@ -56,7 +55,7 @@ namespace ProjectGenerator {
                 cmakeListsFileDest,
                 std::filesystem::copy_options::overwrite_existing
             );
-            updateCmakeListsFile(cmakeListsFileDest, projectParams);
+            updateCmakeListsFile(cmakeListsFileDest, templatesDir, projectParams);
 
             std::filesystem::path gitIgnoreFileSrc = templatesDir / ".gitignore";
             std::filesystem::path gitIgnoreFileDest = fullProjectPath / ".gitignore";
@@ -85,7 +84,7 @@ namespace ProjectGenerator {
             );
 
             if(projectParams.useSdl) {
-                std::filesystem::path mainFileSrc = templatesDir / "SDL" / "main.cpp";
+                std::filesystem::path mainFileSrc = templatesDir / SDLTemplateFiles::SDL_MAIN;
                 std::filesystem::path mainFileDest = fullProjectPath / "tests" /"main.cpp";
                 std::filesystem::copy_file(
                     mainFileSrc,
@@ -93,7 +92,7 @@ namespace ProjectGenerator {
                     std::filesystem::copy_options::overwrite_existing
                 );
             } else if(projectParams.useRayLib) {
-                std::filesystem::path mainFileSrc = templatesDir / "RAYLIB" / "main.cpp";
+                std::filesystem::path mainFileSrc = templatesDir / RAYLIBTemplateFiles::RAYLIB_MAIN;
                 std::filesystem::path mainFileDest = fullProjectPath / "tests" /"main.cpp";
                 std::filesystem::copy_file(
                     mainFileSrc,
@@ -101,7 +100,9 @@ namespace ProjectGenerator {
                     std::filesystem::copy_options::overwrite_existing
                 );
             } else {
-                std::filesystem::path mainFileSrc = templatesDir / "main.cpp";
+                std::filesystem::path mainFileSrc = projectParams.type == ProjectType::Library
+                    ? templatesDir / LIBTemplateFiles::LIBRARY_MAIN
+                    : templatesDir / "main.cpp";
                 std::filesystem::path mainFileDest = fullProjectPath / "tests" /"main.cpp";
                 std::filesystem::copy_file(
                     mainFileSrc,
@@ -110,14 +111,38 @@ namespace ProjectGenerator {
                 );
                 updateMainFile(mainFileDest, projectParams);
             }
+
+            if(projectParams.type == ProjectType::Library) {
+                copyLibraryFiles(fullProjectPath, templatesDir, projectParams);
+            }
         } catch (const std::filesystem::filesystem_error& e) {
             std::cerr << "Error: " << e.what() << "\n";
         }
     }
 
+    void copyLibraryFiles(const std::filesystem::path fullProjectPath, const std::filesystem::path templatesDir, const ProjectParams& projectParams) {
+        std::filesystem::path headerFileSrc = templatesDir / LIBTemplateFiles::LIBRARY_HEADER;
+        std::filesystem::path headerFileDest = fullProjectPath / "include" / (projectParams.name + ".hpp");
+        std::filesystem::copy_file(
+            headerFileSrc,
+            headerFileDest,
+            std::filesystem::copy_options::overwrite_existing
+        );
+        updateMainFile(headerFileDest, projectParams);
+
+        std::filesystem::path sourceFileSrc = templatesDir / LIBTemplateFiles::LIBRARY_SOURCE;
+        std::filesystem::path sourceFileDest = fullProjectPath / "src" / (projectParams.name + ".cpp");
+        std::filesystem::copy_file(
+            sourceFileSrc,
+            sourceFileDest,
+            std::filesystem::copy_options::overwrite_existing
+        );
+        updateMainFile(sourceFileDest, projectParams);
+    }
+
     ProjectParams getParamsFromArgs(int argc, char* argv[]) {
         ProjectParams projectParams;
-        for(int i = 0; i < argc; i++) {
+        for(int i = 0; i + 1 < argc; i++) {
             if(argv[i] == ProjectGenerator::PROJECT_NAME) {
                 projectParams.name = argv[i+1];
             }
@@ -130,11 +155,53 @@ namespace ProjectGenerator {
             if(argv[i] == ProjectGenerator::PROJECT_USE_RAYLIB) {
                 projectParams.useRayLib = argv[i+1] == ProjectGenerator::PROJECT_USE_RAYLIB_VAL;
             }
+            if(argv[i] == ProjectGenerator::PROJECT_USE_JSON) {
+                projectParams.useJson = argv[i+1] == ProjectGenerator::PROJECT_USE_JSON_VAL;
+            }
+            if(argv[i] == ProjectGenerator::PROJECT_USE_HTTP) {
+                projectParams.useHttp = argv[i+1] == ProjectGenerator::PROJECT_USE_HTTP_VAL;
+            }
+            if(argv[i] == ProjectGenerator::PROJECT_TYPE) {
+                projectParams.type = argv[i+1] == ProjectGenerator::PROJECT_TYPE_LIB_VAL
+                    ? ProjectType::Library
+                    : ProjectType::App;
+            }
+            if(argv[i] == ProjectGenerator::PROJECT_OVERWRITE) {
+                projectParams.overwrite = argv[i+1] == ProjectGenerator::PROJECT_OVERWRITE_VAL;
+            }
         }
         return projectParams;
     }
 
-    void updateCmakeListsFile(std::filesystem::path cmakeListsFileDest, const ProjectParams& projectParams) {
+    bool isHelpRequested(int argc, char* argv[]) {
+        for(int i = 1; i < argc; i++) {
+            if(argv[i] == ProjectGenerator::HELP || argv[i] == ProjectGenerator::HELP_SHORT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void printHelp() {
+        std::cout << R"(Usage: ProjGenCpp [options]
+
+Options:
+  --projectName <name>      Project name (default: MyNewProject)
+  --projectPath <path>      Directory where the project is created (default: current directory)
+  --projectType <app|lib>   app - executable, lib - library + test executable (default: app)
+  --useSDL yes              Add SDL3
+  --useRAYLIB yes           Add raylib
+  --useJSON yes             Add nlohmann/json (JSON)
+  --useHTTP yes             Add cpr (HTTP/HTTPS requests)
+  --overwrite yes           Remove and regenerate the project if it already exists
+  --help, -h                Show this help
+
+Example:
+  ProjGenCpp --projectName MyLib --projectType lib --useJSON yes --useHTTP yes
+)";
+    }
+
+    void updateCmakeListsFile(std::filesystem::path cmakeListsFileDest, const std::filesystem::path templatesDir, const ProjectParams& projectParams) {
         std::unordered_map<std::string, std::string> params = {
             {
                 std::string(CmakeParams::PROJECT_NAME),
@@ -146,24 +213,59 @@ namespace ProjectGenerator {
             }
         };
         //Add fetch_Content
-        if(projectParams.useSdl || projectParams.useRayLib) {
+        if(projectParams.useSdl || projectParams.useRayLib || projectParams.useJson || projectParams.useHttp) {
             params[std::string(CmakeParamsKeys::FETCH_CONTENT)] = std::string(CmakeParamsCommonValue::FETCH_CONTENT);
+        } else {
+            params[std::string(CmakeParamsKeys::FETCH_CONTENT)] = "";
+        }
+        //Biblioteka: zależności linkowane PUBLIC do biblioteki, exe dostaje je przechodnio
+        const bool isLibrary = projectParams.type == ProjectType::Library;
+        std::unordered_map<std::string, std::string> linkParams = {
+            {
+                std::string(CmakeParams::LINK_TARGET),
+                isLibrary ? "${PROJECT_NAME}Lib" : "${PROJECT_NAME}"
+            },
+            {
+                std::string(CmakeParams::LINK_SCOPE),
+                isLibrary ? "PUBLIC" : "PRIVATE"
+            }
+        };
+        if(isLibrary) {
+            params[std::string(CmakeParamsKeys::LIBRARY_TARGET)] = getFileContent((templatesDir / LIBTemplateFiles::LIBRARY_TARGET).string());
+            params[std::string(CmakeParamsKeys::LIBRARY_LINK)] = getFileContent((templatesDir / LIBTemplateFiles::LIBRARY_LINK).string());
+        } else {
+            params[std::string(CmakeParamsKeys::LIBRARY_TARGET)] = "";
+            params[std::string(CmakeParamsKeys::LIBRARY_LINK)] = "";
         }
         if(projectParams.useSdl) {
-            params[std::string(CmakeParamsKeys::SDL_FETCH)] = getFileContent(std::string(SDLTemplateFiles::SDL_FETCH));
-            params[std::string(CmakeParamsKeys::SDL_TARGET_LINK)] = getFileContent(std::string(SDLTemplateFiles::SDL_TARGET_LINK));
-            params[std::string(CmakeParamsKeys::SDL_COPY_DLL)] = getFileContent(std::string(SDLTemplateFiles::SDL_COPY_DLL));
+            params[std::string(CmakeParamsKeys::SDL_FETCH)] = getFileContent((templatesDir / SDLTemplateFiles::SDL_FETCH).string());
+            params[std::string(CmakeParamsKeys::SDL_TARGET_LINK)] = getTemplateContent((templatesDir / SDLTemplateFiles::SDL_TARGET_LINK).string(), linkParams);
+            params[std::string(CmakeParamsKeys::SDL_COPY_DLL)] = getFileContent((templatesDir / SDLTemplateFiles::SDL_COPY_DLL).string());
         } else if(projectParams.useSdl == false) {
             params[std::string(CmakeParamsKeys::SDL_FETCH)] = "";
             params[std::string(CmakeParamsKeys::SDL_TARGET_LINK)] = "";
             params[std::string(CmakeParamsKeys::SDL_COPY_DLL)] = "";
         }
         if(projectParams.useRayLib) {
-            params[std::string(CmakeParamsKeys::RAYLIB_FETCH)] = getFileContent(std::string(RAYLIBTemplateFiles::RAYLIB_FETCH));
-            params[std::string(CmakeParamsKeys::RAYLIB_TARGET_LINK)] = getFileContent(std::string(RAYLIBTemplateFiles::RAYLIB_TARGET_LINK));
+            params[std::string(CmakeParamsKeys::RAYLIB_FETCH)] = getFileContent((templatesDir / RAYLIBTemplateFiles::RAYLIB_FETCH).string());
+            params[std::string(CmakeParamsKeys::RAYLIB_TARGET_LINK)] = getTemplateContent((templatesDir / RAYLIBTemplateFiles::RAYLIB_TARGET_LINK).string(), linkParams);
         } else if(projectParams.useRayLib == false) {
             params[std::string(CmakeParamsKeys::RAYLIB_FETCH)] = "";
             params[std::string(CmakeParamsKeys::RAYLIB_TARGET_LINK)] = "";
+        }
+        if(projectParams.useJson) {
+            params[std::string(CmakeParamsKeys::JSON_FETCH)] = getFileContent((templatesDir / JSONTemplateFiles::JSON_FETCH).string());
+            params[std::string(CmakeParamsKeys::JSON_TARGET_LINK)] = getTemplateContent((templatesDir / JSONTemplateFiles::JSON_TARGET_LINK).string(), linkParams);
+        } else {
+            params[std::string(CmakeParamsKeys::JSON_FETCH)] = "";
+            params[std::string(CmakeParamsKeys::JSON_TARGET_LINK)] = "";
+        }
+        if(projectParams.useHttp) {
+            params[std::string(CmakeParamsKeys::HTTP_FETCH)] = getFileContent((templatesDir / HTTPTemplateFiles::HTTP_FETCH).string());
+            params[std::string(CmakeParamsKeys::HTTP_TARGET_LINK)] = getTemplateContent((templatesDir / HTTPTemplateFiles::HTTP_TARGET_LINK).string(), linkParams);
+        } else {
+            params[std::string(CmakeParamsKeys::HTTP_FETCH)] = "";
+            params[std::string(CmakeParamsKeys::HTTP_TARGET_LINK)] = "";
         }
         replaceInFile(cmakeListsFileDest.string(), params);
     }
@@ -227,6 +329,14 @@ namespace ProjectGenerator {
         buffer << input.rdbuf();
         std::string content = buffer.str();
         input.close();
+        return content;
+    }
+
+    std::string getTemplateContent(const std::string& filePath, std::unordered_map<std::string, std::string>& params) {
+        std::string content = getFileContent(filePath);
+        for(const auto& [key, value]: params) {
+            replaceAll(content, key, value);
+        }
         return content;
     }
     
