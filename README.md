@@ -1,87 +1,87 @@
-# ProjGenCpp – generator projektów C++
+# ProjGenCpp – C++ project generator
 
-Narzędzie konsolowe, które tworzy gotowy do zbudowania szkielet projektu C++ opartego o CMake:
-strukturę katalogów, `CMakeLists.txt`, konfigurację VS Code (`launch.json`, `tasks.json`),
-`.gitignore` oraz przykładowy `main.cpp`. Opcjonalnie dodaje zależności
-(SDL3, raylib, JSON, HTTP) pobierane automatycznie przez `FetchContent`.
+A command-line tool that creates a ready-to-build CMake-based C++ project skeleton:
+directory structure, `CMakeLists.txt`, VS Code configuration (`launch.json`, `tasks.json`),
+`.gitignore` and a sample `main.cpp`. Optionally it adds dependencies
+(SDL3, raylib, JSON, HTTP) that are downloaded automatically via `FetchContent`.
 
-## Wymagania
+## Requirements
 
 - CMake ≥ 3.26
-- Kompilator z obsługą C++17 (projekt jest przygotowany pod MinGW-w64 / `MinGW Makefiles`)
-- Git (potrzebny do pobierania zależności przez `FetchContent`)
-- Dostęp do internetu przy pierwszej konfiguracji wygenerowanego projektu z zależnościami
+- A C++17 compiler (the project is set up for MinGW-w64 / `MinGW Makefiles`)
+- Git (needed by `FetchContent` to download dependencies)
+- Internet access on the first configure of a generated project with dependencies
 
-## Budowanie generatora
+## Building the generator
 
 ```sh
 cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
 
-Wersja Release (do osobnego katalogu):
+Release build (into a separate directory):
 
 ```sh
 cmake -B build-release -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release
 ```
 
-Po zbudowaniu katalog `templates/` jest automatycznie kopiowany obok pliku `ProjGenCpp.exe`.
-Generator zawsze szuka szablonów w katalogu, w którym leży exe, więc można go uruchamiać
-z dowolnego miejsca. Przenosząc exe, trzeba przenieść razem z nim katalog `templates/`.
+After the build, the `templates/` directory is copied next to `ProjGenCpp.exe` automatically.
+The generator always looks for templates in the directory containing the exe, so it can be run
+from anywhere. If you move the exe, move the `templates/` directory along with it.
 
-W VS Code dostępne są konfiguracje uruchomienia **Debug app** oraz **build_release**
-(buduje wersję Release do `build-release/` i ją uruchamia).
+In VS Code there are two launch configurations: **Debug app** and **build_release**
+(builds the Release version into `build-release/` and runs it).
 
-## Użycie
+## Usage
 
 ```sh
-ProjGenCpp --projectName <nazwa> [opcje]
+ProjGenCpp --projectName <name> [options]
 ```
 
-Uruchomienie bez argumentów albo z `--help` / `-h` wyświetla listę opcji.
+Running without arguments, or with `--help` / `-h`, prints the list of options.
 
-| Opcja | Opis | Domyślnie |
+| Option | Description | Default |
 |---|---|---|
-| `--projectName <nazwa>` | Nazwa projektu (i głównego targetu CMake) | `MyNewProject` |
-| `--projectPath <ścieżka>` | Katalog, w którym powstanie folder projektu | bieżący katalog |
-| `--projectType <app\|lib>` | `app` – aplikacja, `lib` – biblioteka + program testowy | `app` |
-| `--useSDL yes` | Dodaje SDL3 | – |
-| `--useRAYLIB yes` | Dodaje raylib | – |
-| `--useJSON yes` | Dodaje nlohmann/json | – |
-| `--useHTTP yes` | Dodaje cpr (zapytania HTTP/HTTPS) | – |
-| `--overwrite yes` | Usuwa istniejący folder projektu i generuje go od nowa | – |
-| `--help`, `-h` | Wyświetla pomoc | – |
+| `--projectName <name>` | Project name (also the main CMake target) | `MyNewProject` |
+| `--projectPath <path>` | Directory in which the project folder is created | current directory |
+| `--projectType <app\|lib>` | `app` – application, `lib` – library + test executable | `app` |
+| `--useSDL yes` | Add SDL3 | – |
+| `--useRAYLIB yes` | Add raylib | – |
+| `--useJSON yes` | Add nlohmann/json | – |
+| `--useHTTP yes` | Add cpr (HTTP/HTTPS requests) | – |
+| `--overwrite yes` | Remove the existing project folder and generate it again | – |
+| `--help`, `-h` | Show help | – |
 
-Bez `--overwrite yes` generator nie nadpisuje istniejącego projektu, tylko wypisuje komunikat
-i kończy działanie.
+Without `--overwrite yes` the generator does not touch an existing project; it prints a message
+and exits.
 
-### Przykłady
+### Examples
 
-Zwykła aplikacja:
-
-```sh
-ProjGenCpp --projectName MojaAplikacja --projectPath D:/Projekty
-```
-
-Gra w raylib:
+Plain application:
 
 ```sh
-ProjGenCpp --projectName MojaGra --useRAYLIB yes
+ProjGenCpp --projectName MyApp --projectPath D:/Projects
 ```
 
-Biblioteka korzystająca z JSON i HTTP:
+raylib game:
 
 ```sh
-ProjGenCpp --projectName MojaLib --projectType lib --useJSON yes --useHTTP yes
+ProjGenCpp --projectName MyGame --useRAYLIB yes
 ```
 
-## Wygenerowany projekt
+Library using JSON and HTTP:
+
+```sh
+ProjGenCpp --projectName MyLib --projectType lib --useJSON yes --useHTTP yes
+```
+
+## Generated project
 
 ```
-<nazwa>/
+<name>/
 ├── .vscode/
-│   ├── launch.json      # debugowanie build/<nazwa>.exe
+│   ├── launch.json      # debugs build/<name>.exe
 │   └── tasks.json       # CMake Configure + Build (Debug)
 ├── include/
 ├── src/
@@ -91,48 +91,48 @@ ProjGenCpp --projectName MojaLib --projectType lib --useJSON yes --useHTTP yes
 └── CMakeLists.txt
 ```
 
-Projekt buduje się poleceniami:
+Build it with:
 
 ```sh
 cmake -B build -G "MinGW Makefiles"
 cmake --build build
 ```
 
-albo w VS Code klawiszem F5 (konfiguracja **Debug app** najpierw buduje projekt).
+or press F5 in VS Code (the **Debug app** configuration builds the project first).
 
-### Typ `app` (domyślny)
+### `app` type (default)
 
-Jeden target – plik wykonywalny `<nazwa>` budowany z `tests/main.cpp`.
-Zależności są linkowane do niego jako `PRIVATE`.
+A single target: the `<name>` executable built from `tests/main.cpp`.
+Dependencies are linked to it as `PRIVATE`.
 
-### Typ `lib`
+### `lib` type
 
-- Biblioteka `<nazwa>Lib` budowana z `src/<nazwa>.cpp`, z publicznym katalogiem `include/`.
-- Przykładowe pliki `include/<nazwa>.hpp` i `src/<nazwa>.cpp` z funkcją `helloFromLibrary()`.
-- Program testowy `<nazwa>` (z `tests/main.cpp`), który linkuje bibliotekę.
-- Zależności (SDL, raylib, JSON, HTTP) są linkowane do biblioteki jako `PUBLIC`,
-  więc program testowy i każdy inny konsument biblioteki dostaje je automatycznie.
+- A `<name>Lib` library built from `src/<name>.cpp`, with `include/` as a public include directory.
+- Sample `include/<name>.hpp` and `src/<name>.cpp` files with a `helloFromLibrary()` function.
+- A `<name>` test executable (from `tests/main.cpp`) that links the library.
+- Dependencies (SDL, raylib, JSON, HTTP) are linked to the library as `PUBLIC`,
+  so the test executable and any other consumer of the library get them automatically.
 
-## Dostępne zależności
+## Available dependencies
 
-| Flaga | Biblioteka | Wersja | Target CMake | Nagłówek |
+| Flag | Library | Version | CMake target | Header |
 |---|---|---|---|---|
 | `--useSDL` | [SDL3](https://github.com/libsdl-org/SDL) | 3.2.14 | `SDL3::SDL3` | `<SDL3/SDL.h>` |
 | `--useRAYLIB` | [raylib](https://github.com/raysan5/raylib) | 5.5 | `raylib` | `<raylib.h>` |
 | `--useJSON` | [nlohmann/json](https://github.com/nlohmann/json) | 3.12.0 | `nlohmann_json::nlohmann_json` | `<nlohmann/json.hpp>` |
 | `--useHTTP` | [cpr](https://github.com/libcpr/cpr) | 1.11.2 | `cpr::cpr` | `<cpr/cpr.h>` |
 
-Uwagi:
+Notes:
 
-- **SDL3** jest budowane jako biblioteka współdzielona; na Windowsie `SDL3.dll` jest po buildzie
-  kopiowane obok exe.
-- **SDL / raylib** – przy tych flagach `tests/main.cpp` zawiera przykładowe okno zamiast „Hello world”.
-  Gdy podane są obie, użyty zostanie przykład SDL.
-- **cpr** buduje libcurl ze źródeł, więc pierwsza konfiguracja i build trwają kilka minut.
-  Biblioteki są budowane statycznie (`BUILD_SHARED_LIBS OFF`), a HTTPS działa przez
-  Windowsowy SChannel – bez potrzeby instalowania OpenSSL.
+- **SDL3** is built as a shared library; on Windows `SDL3.dll` is copied next to the exe after
+  the build.
+- **SDL / raylib** – with these flags `tests/main.cpp` contains a sample window instead of
+  "Hello world". If both are given, the SDL sample is used.
+- **cpr** builds libcurl from source, so the first configure and build take a few minutes.
+  The libraries are built statically (`BUILD_SHARED_LIBS OFF`), and HTTPS works through Windows
+  SChannel, so there is no need to install OpenSSL.
 
-Przykład użycia JSON i HTTP:
+JSON + HTTP example:
 
 ```cpp
 #include <cpr/cpr.h>
@@ -145,34 +145,37 @@ if (r.status_code == 200) {
 }
 ```
 
-## Jak działają szablony
+## How templates work
 
-Pliki w `templates/` są kopiowane do nowego projektu, a w treści podmieniane są znaczniki:
+Files in `templates/` are copied into the new project, and placeholders in their content are
+replaced:
 
-- `{{PROJECT_NAME}}`, `{{CMAKE_VERSION}}` – nazwa projektu i wersja CMake.
-- `#{{...}}` w `templates/CMakeLists.txt` (np. `#{{SDL_FETCH}}`, `#{{LIBRARY_TARGET}}`) –
-  miejsca, w które wstawiana jest zawartość fragmentów `*.template.txt`. Gdy dana opcja jest
-  wyłączona, znacznik jest usuwany.
-- `{{LINK_TARGET}}` / `{{LINK_SCOPE}}` we fragmentach `*-link.template.txt` – target i zakres
-  linkowania, zależne od typu projektu (`${PROJECT_NAME} PRIVATE` lub `${PROJECT_NAME}Lib PUBLIC`).
+- `{{PROJECT_NAME}}`, `{{CMAKE_VERSION}}` – project name and CMake version.
+- `#{{...}}` in `templates/CMakeLists.txt` (e.g. `#{{SDL_FETCH}}`, `#{{LIBRARY_TARGET}}`) –
+  spots where the content of `*.template.txt` snippets is inserted. When an option is disabled,
+  the placeholder is removed.
+- `{{LINK_TARGET}}` / `{{LINK_SCOPE}}` in `*-link.template.txt` snippets – the link target and
+  scope, depending on the project type (`${PROJECT_NAME} PRIVATE` or `${PROJECT_NAME}Lib PUBLIC`).
 
 ```
 templates/
 ├── CMakeLists.txt, main.cpp, launch.json, tasks.json, .gitignore
-├── LIB/      # target biblioteki, szablony .hpp/.cpp i main.cpp dla typu lib
-├── SDL/      # fetch, link, kopiowanie DLL, przykładowy main.cpp
-├── RAYLIB/   # fetch, link, przykładowy main.cpp
+├── LIB/      # library target, .hpp/.cpp templates and main.cpp for the lib type
+├── SDL/      # fetch, link, DLL copy, sample main.cpp
+├── RAYLIB/   # fetch, link, sample main.cpp
 ├── JSON/     # fetch, link
 └── HTTP/     # fetch, link
 ```
 
-### Dodawanie nowej biblioteki
+### Adding a new library
 
-1. Utwórz `templates/<NAZWA>/` z plikami `<nazwa>-fetch.template.txt` (`FetchContent_Declare` +
-   `FetchContent_MakeAvailable`) oraz `<nazwa>-link.template.txt`
+1. Create `templates/<NAME>/` with `<name>-fetch.template.txt` (`FetchContent_Declare` +
+   `FetchContent_MakeAvailable`) and `<name>-link.template.txt`
    (`target_link_libraries({{LINK_TARGET}} {{LINK_SCOPE}} <target>)`).
-2. Dodaj znaczniki `#{{<NAZWA>_FETCH}}` i `#{{<NAZWA>_TARGET_LINK}}` w `templates/CMakeLists.txt`.
-3. W [include/projectGenerator.hpp](include/projectGenerator.hpp) dodaj stałe flagi, klucze
-   w `CmakeParamsKeys`, ścieżki w nowej przestrzeni `<NAZWA>TemplateFiles` i pole w `ProjectParams`.
-4. W [src/projectGenerator.cpp](src/projectGenerator.cpp) obsłuż flagę w `getParamsFromArgs`,
-   uzupełnij `updateCmakeListsFile` i opis w `printHelp`.
+2. Add the `#{{<NAME>_FETCH}}` and `#{{<NAME>_TARGET_LINK}}` placeholders to
+   `templates/CMakeLists.txt`.
+3. In [include/projectGenerator.hpp](include/projectGenerator.hpp) add the flag constants,
+   keys in `CmakeParamsKeys`, paths in a new `<NAME>TemplateFiles` namespace and a field in
+   `ProjectParams`.
+4. In [src/projectGenerator.cpp](src/projectGenerator.cpp) handle the flag in
+   `getParamsFromArgs`, extend `updateCmakeListsFile` and add the option to `printHelp`.
